@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solr AI Doctor — Observability & Root Cause Analysis Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Header -->
+        <header class="navbar">
+            <div class="brand">
+                <div class="logo-icon">🩺</div>
+                <div class="brand-text">
+                    <h1>Solr AI Doctor</h1>
+                    <span class="subtitle">Distributed SolrCloud Observability & Grounded RCA</span>
+                </div>
+            </div>
+
+            <!-- Scenario Quick Switcher -->
+            <div class="scenario-bar">
+                <span class="scenario-label">Demo Scenario:</span>
+                <div class="btn-group">
+                    <button class="btn-scenario" data-scenario="healthy">1. Healthy</button>
+                    <button class="btn-scenario" data-scenario="gc_pressure">2. GC Pressure</button>
+                    <button class="btn-scenario" data-scenario="solr_failure">3. Node Failure</button>
+                    <button class="btn-scenario" data-scenario="query_latency">4. Latency Spike</button>
+                    <button class="btn-scenario active" data-scenario="mixed_incident">5. Mixed Cascade</button>
+                </div>
+            </div>
+
+            <div class="nav-actions">
+                <span id="llm-badge" class="badge badge-mock">LLM: Mock Provider</span>
+                <button id="btn-custom-ingest" class="btn btn-secondary">+ Ingest Logs</button>
+                <button id="btn-refresh" class="btn btn-primary">↻ Refresh</button>
+            </div>
+        </header>
+
+        <!-- Main Dashboard View -->
+        <main class="main-content">
+            <!-- Summary Health Bar -->
+            <section class="metrics-grid">
+                <div class="metric-card glass-card">
+                    <div class="metric-header">Cluster Health</div>
+                    <div class="metric-value-row">
+                        <span id="cluster-score" class="metric-value">--</span>
+                        <span id="cluster-badge" class="badge badge-health">LOADING</span>
+                    </div>
+                    <div id="cluster-concern" class="metric-subtext">Evaluating cluster telemetry...</div>
+                </div>
+
+                <div class="metric-card glass-card">
+                    <div class="metric-header">Cluster Nodes</div>
+                    <div class="node-counts-row">
+                        <div class="count-item"><span id="count-healthy" class="cnt healthy">0</span> Healthy</div>
+                        <div class="count-item"><span id="count-warning" class="cnt warning">0</span> Warning</div>
+                        <div class="count-item"><span id="count-critical" class="cnt critical">0</span> Critical</div>
+                    </div>
+                    <div class="metric-subtext">Total Nodes: <span id="count-total">0</span></div>
+                </div>
+
+                <div class="metric-card glass-card">
+                    <div class="metric-header">Active Incidents</div>
+                    <div class="metric-value-row">
+                        <span id="count-incidents" class="metric-value">0</span>
+                        <span class="badge badge-incident">CORRELATED</span>
+                    </div>
+                    <div class="metric-subtext">Multi-source cascade clusters</div>
+                </div>
+
+                <div class="metric-card glass-card">
+                    <div class="metric-header">Anomalies Detected</div>
+                    <div class="metric-value-row">
+                        <span id="count-anomalies" class="metric-value">0</span>
+                        <span class="badge badge-info">DETERMINISTIC</span>
+                    </div>
+                    <div class="metric-subtext">Rule threshold evaluations</div>
+                </div>
+            </section>
+
+            <!-- Node Health Status Grid -->
+            <section class="section-container">
+                <h2 class="section-title">Node Telemetry & Health Gauges</h2>
+                <div id="nodes-grid" class="nodes-grid">
+                    <!-- Dynamic Node Cards -->
+                </div>
+            </section>
+
+            <!-- Active Incidents & Grounded RCA -->
+            <section class="section-container">
+                <div class="section-header-row">
+                    <h2 class="section-title">Detected Incidents & Root Cause Analysis</h2>
+                    <span class="section-hint">Click any incident to open the complete Evidence Package & AI Diagnostic Reasoning Drawer</span>
+                </div>
+                <div id="incidents-container" class="incidents-container">
+                    <!-- Dynamic Incident Cards -->
+                </div>
+            </section>
+
+            <!-- Telemetry Stream / Cascade Timeline -->
+            <section class="section-container">
+                <div class="section-header-row">
+                    <h2 class="section-title">Unified Solr & JVM GC Timeline</h2>
+                    <div class="filter-group">
+                        <button class="filter-btn active" data-filter="ALL">All Events</button>
+                        <button class="filter-btn" data-filter="SOLR">Solr Logs</button>
+                        <button class="filter-btn" data-filter="JVM_GC">GC Logs</button>
+                        <button class="filter-btn" data-filter="ANOMALY">Anomalies Only</button>
+                    </div>
+                </div>
+                <div id="timeline-container" class="timeline-container glass-card">
+                    <div class="timeline-stream" id="timeline-stream">
+                        <!-- Dynamic Timeline Rows -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- RCA Details Modal / Drawer -->
+    <div id="rca-modal" class="modal-overlay hidden">
+        <div class="modal-card glass-card">
+            <div class="modal-header">
+                <div class="modal-title-box">
+                    <span id="modal-severity" class="badge">CRITICAL</span>
+                    <h2 id="modal-title">Incident Analysis</h2>
+                </div>
+                <button id="modal-close" class="btn-close">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- AI RCA Hero Banner -->
+                <div class="rca-hero">
+                    <div class="rca-hero-header">
+                        <span class="hero-label">Root Cause Analysis</span>
+                        <div class="hero-badges">
+                            <span id="modal-causality" class="badge badge-causal">LIKELY_CAUSAL</span>
+                            <span id="modal-confidence" class="badge badge-conf">Confidence: 92%</span>
+                        </div>
+                    </div>
+                    <p id="modal-root-cause" class="rca-summary-text">Analyzing root cause...</p>
+                    <div id="modal-conf-reason" class="rca-conf-reason">Confidence reason...</div>
+                </div>
+
+                <!-- Three-Column Facts / Inferences / Unknowns -->
+                <div class="rca-columns-grid">
+                    <div class="rca-col glass-card-nested">
+                        <div class="col-title">🔍 Observed Facts (Logs)</div>
+                        <ul id="modal-facts" class="rca-list"></ul>
+                    </div>
+                    <div class="rca-col glass-card-nested">
+                        <div class="col-title">⚙️ Inferred Mechanisms</div>
+                        <ul id="modal-mechanisms" class="rca-list"></ul>
+                    </div>
+                    <div class="rca-col glass-card-nested">
+                        <div class="col-title">❓ Uncertainties & Gaps</div>
+                        <ul id="modal-uncertainties" class="rca-list"></ul>
+                    </div>
+                </div>
+
+                <!-- Operational & Business Impact -->
+                <div class="impact-section glass-card-nested">
+                    <div class="col-title">💥 Impact Assessment</div>
+                    <div class="impact-row">
+                        <div class="impact-block">
+                            <strong>Operational Impact:</strong>
+                            <p id="modal-op-impact"></p>
+                        </div>
+                        <div class="impact-block">
+                            <strong>Business Impact:</strong>
+                            <p id="modal-biz-impact" class="text-muted"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Remediation Runbook Steps -->
+                <div class="remediation-section">
+                    <div class="col-title">🛠️ Recommended Remediation Actions</div>
+                    <div class="remediation-grid">
+                        <div class="rem-col">
+                            <h4>Immediate Actions</h4>
+                            <div id="modal-immediate-rem" class="rem-list"></div>
+                        </div>
+                        <div class="rem-col">
+                            <h4>Preventative / Architectural</h4>
+                            <div id="modal-preventative-rem" class="rem-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Model Metadata Footer -->
+                <div class="rca-footer-meta">
+                    <span>LLM Engine: <strong id="modal-llm-model">--</strong></span>
+                    <span>Execution Mode: <strong id="modal-llm-mode">--</strong></span>
+                    <span>Latency: <strong id="modal-llm-latency">--</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Ingest Modal -->
+    <div id="ingest-modal" class="modal-overlay hidden">
+        <div class="modal-card glass-card ingest-modal-card">
+            <div class="modal-header">
+                <h2>Ingest Custom Solr & JVM Logs</h2>
+                <button id="ingest-close" class="btn-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Target Node ID:</label>
+                    <input type="text" id="custom-node-id" class="input-text" value="solr-node-1">
+                </div>
+                <div class="form-group">
+                    <label>Solr Logs (Paste raw lines):</label>
+                    <textarea id="custom-solr-logs" class="input-textarea" placeholder="2026-09-08 10:00:00.000 INFO ... QTime=1500"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>JVM GC Logs (Paste raw lines):</label>
+                    <textarea id="custom-gc-logs" class="input-textarea" placeholder="2026-09-08T10:00:00.000+0000: [solr-node-1] [Full GC ... 3.500 secs]"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button id="btn-submit-ingest" class="btn btn-primary">Process & Analyze</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

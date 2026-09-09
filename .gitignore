@@ -1,0 +1,52 @@
+# ── Python ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# ── Virtual Environments ─────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+.env.local
+
+# ── Environment / Secrets ────────────────────────────────
+# Keep .env.example but NEVER commit the real .env
+.env
+
+# ── Database ─────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ── Pytest / Coverage ────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.coverage
+
+# ── IDE / Editor ─────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Logs ─────────────────────────────────────────────────
+*.log
+logs/
+
+# ── OS ───────────────────────────────────────────────────
+desktop.ini
+ehthumbs.db
