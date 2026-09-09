@@ -52,4 +52,4 @@ Open **[http://localhost:8000](http://localhost:8000)** in your browser.
 - [docs/TRADE_OFFS.md](docs/TRADE_OFFS.md) — Detailed rationale behind engineering design decisions.
 - [docs/LIMITATIONS.md](docs/LIMITATIONS.md) — Known constraints and assumptions.
 - [docs/PRODUCTION_SCALING.md](docs/PRODUCTION_SCALING.md) — Production architecture roadmap (Kafka, Flink, ClickHouse).
-- [docs/INTERVIEW_GUIDE.md](docs/INTERVIEW_GUIDE.md) — Comprehensive technical Q&A and architecture defense guide.
+
